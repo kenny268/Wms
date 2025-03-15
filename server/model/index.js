@@ -1,7 +1,9 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-// Import all models
+// Import the models
+const Receipt = require('./receipt');
+const ReceiptLineItem = require('./receipt_line_item');
 const Product = require('./product');
 const Supplier = require('./supplier');
 const User = require('./user');
@@ -18,61 +20,157 @@ const ReturnAuthorization = require('./return_authorization');
 const ReturnAuthorizationLineItem = require('./return_authorization_line_item');
 const ProductCategory = require('./product_category');
 const UnitOfMeasure = require('./unit_of_measure');
-const Receipt = require('./receipt');
-const ReceiptLineItem = require('./receipt_line_item');
+const Address = require('./address');
+const Role = require('./role');
+const UserRole = require('./user_role');
+const StockTake = require('./stock_take');
+const StockTakeItem = require('./stock_take_item');
+const ProductLot = require('./product_lot');
 
-// --- Product Relationships ---
-PurchaseOrder.belongsTo(Supplier, { foreignKey: 'SupplierID' });
-Supplier.hasMany(PurchaseOrder, { foreignKey: 'SupplierID' });
 
-PurchaseOrder.belongsTo(User, { foreignKey: 'OrderCreatedByUserID', as: 'OrderCreator' });
-User.hasMany(PurchaseOrder, { foreignKey: 'OrderCreatedByUserID', as: 'CreatedOrders' });
-
-PurchaseOrder.hasMany(PurchaseOrderLineItem, { foreignKey: 'PurchaseOrderID', onDelete: 'CASCADE' });
-PurchaseOrderLineItem.belongsTo(PurchaseOrder, { foreignKey: 'PurchaseOrderID' });
-
-PurchaseOrderLineItem.belongsTo(Product, { foreignKey: 'ProductID' });
-Product.hasMany(PurchaseOrderLineItem, { foreignKey: 'ProductID' });
-
+// Define Associations (Relationships between tables)
 // --- Warehouse Location Relationships ---
-// Inventory belongs to WarehouseLocation
+WarehouseLocation.belongsTo(WarehouseLocation, { foreignKey: 'ParentLocationID', as: 'Parent' });
+WarehouseLocation.hasMany(WarehouseLocation, { foreignKey: 'ParentLocationID', as: 'Children' });
+
 Inventory.belongsTo(WarehouseLocation, { foreignKey: 'LocationID' });
 WarehouseLocation.hasMany(Inventory, { foreignKey: 'LocationID' });
 
-// StockMovement can have From and To locations
 StockMovement.belongsTo(WarehouseLocation, { foreignKey: 'FromLocationID', as: 'FromLocation' });
 WarehouseLocation.hasMany(StockMovement, { foreignKey: 'FromLocationID', as: 'DepartingMovements' });
 
 StockMovement.belongsTo(WarehouseLocation, { foreignKey: 'ToLocationID', as: 'ToLocation' });
 WarehouseLocation.hasMany(StockMovement, { foreignKey: 'ToLocationID', as: 'ArrivingMovements' });
 
-// --- Inventory Relationships ---
-Inventory.belongsTo(Product, { foreignKey: 'ProductID' });
-Product.hasMany(Inventory, { foreignKey: 'ProductID' });
+StockTakeItem.belongsTo(WarehouseLocation, { foreignKey: 'LocationID' });
+WarehouseLocation.hasMany(StockTakeItem, { foreignKey: 'LocationID' });
 
-// --- Stock Movement Relationships ---
-StockMovement.belongsTo(Product, { foreignKey: 'ProductID' });
-Product.hasMany(StockMovement, { foreignKey: 'ProductID' });
+// --- Stock Take Relationships ---
+StockTake.belongsTo(User, { foreignKey: 'InitiatedByUserID', as: 'Initiator' });
+User.hasMany(StockTake, { foreignKey: 'InitiatedByUserID', as: 'InitiatedStockTakes' });
 
-StockMovement.belongsTo(User, { foreignKey: 'UserID', as: 'Mover' });
+StockTake.hasMany(StockTakeItem, { foreignKey: 'StockTakeID', onDelete: 'CASCADE' });
+StockTakeItem.belongsTo(StockTake, { foreignKey: 'StockTakeID' });
+
+// --- Stock Take Item Relationships ---
+StockTakeItem.belongsTo(Inventory, { foreignKey: 'InventoryID' });
+Inventory.hasMany(StockTakeItem, { foreignKey: 'InventoryID' });
+
+StockTakeItem.belongsTo(ProductLot, { foreignKey: 'ProductLotID' });
+ProductLot.hasMany(StockTakeItem, { foreignKey: 'ProductLotID' });
+
+StockTakeItem.belongsTo(User, { foreignKey: 'CountedByUserID', as: 'Counter' });
+User.hasMany(StockTakeItem, { foreignKey: 'CountedByUserID', as: 'CountsPerformed' });
+
+StockTakeItem.belongsTo(StockMovement, { foreignKey: 'AdjustmentStockMovementID', as: 'AdjustmentMovement' });
+StockMovement.hasMany(StockTakeItem, { foreignKey: 'AdjustmentStockMovementID' });
+
+// Product Category Relationship
+Product.belongsTo(ProductCategory, { foreignKey: 'CategoryID' });
+ProductCategory.hasMany(Product, { foreignKey: 'CategoryID' });
+
+// Unit of Measure Relationships
+Product.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID', as: 'BaseUnit' });
+UnitOfMeasure.hasMany(Product, { foreignKey: 'UOMID', as: 'BaseProducts' });
+
+ReceiptLineItem.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID' });
+UnitOfMeasure.hasMany(ReceiptLineItem, { foreignKey: 'UOMID' });
+
+PurchaseOrderLineItem.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID' });
+UnitOfMeasure.hasMany(PurchaseOrderLineItem, { foreignKey: 'UOMID' });
+
+OutboundOrderLineItem.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID' });
+UnitOfMeasure.hasMany(OutboundOrderLineItem, { foreignKey: 'UOMID' });
+
+// Supplier Relationships
+Supplier.hasMany(PurchaseOrder, { foreignKey: 'SupplierID' });
+PurchaseOrder.belongsTo(Supplier, { foreignKey: 'SupplierID' });
+
+Supplier.hasMany(Receipt, { foreignKey: 'SupplierID' });
+Receipt.belongsTo(Supplier, { foreignKey: 'SupplierID' });
+
+Supplier.belongsTo(Address, { foreignKey: 'AddressID' });
+Address.hasMany(Supplier, { foreignKey: 'AddressID' });
+
+// User Relationships
+User.hasMany(Receipt, { foreignKey: 'ReceiverUserID', as: 'ReceivedReceipts' });
+Receipt.belongsTo(User, { foreignKey: 'ReceiverUserID', as: 'Receiver' });
+
+User.hasMany(Receipt, { foreignKey: 'InspectorUserID', as: 'InspectedReceipts' });
+Receipt.belongsTo(User, { foreignKey: 'InspectorUserID', as: 'Inspector' });
+
+User.hasMany(PurchaseOrder, { foreignKey: 'OrderCreatedByUserID', as: 'CreatedOrders' });
+PurchaseOrder.belongsTo(User, { foreignKey: 'OrderCreatedByUserID', as: 'OrderCreator' });
+
 User.hasMany(StockMovement, { foreignKey: 'UserID', as: 'MovementsPerformed' });
+StockMovement.belongsTo(User, { foreignKey: 'UserID', as: 'Mover' });
 
-// --- Outbound Order Relationships ---
-OutboundOrder.belongsTo(User, { foreignKey: 'OrderCreatedByUserID', as: 'OrderPlacedBy' });
 User.hasMany(OutboundOrder, { foreignKey: 'OrderCreatedByUserID', as: 'PlacedOrders' });
+OutboundOrder.belongsTo(User, { foreignKey: 'OrderCreatedByUserID', as: 'OrderPlacedBy' });
 
+User.hasMany(Shipment, { foreignKey: 'ShippedByUserID', as: 'ShippedItems' });
+Shipment.belongsTo(User, { foreignKey: 'ShippedByUserID', as: 'Shipper' });
+
+User.hasMany(ReturnAuthorization, { foreignKey: 'RequestedByUserID', as: 'ReturnRequestor' });
+ReturnAuthorization.belongsTo(User, { foreignKey: 'RequestedByUserID', as: 'ReturnRequestor' });
+
+User.hasMany(ReturnAuthorization, { foreignKey: 'ApprovedByUserID', as: 'ReturnApprover' });
+ReturnAuthorization.belongsTo(User, { foreignKey: 'ApprovedByUserID', as: 'ReturnApprover' });
+
+User.belongsToMany(Role, { through: UserRole });
+Role.belongsToMany(User, { through: UserRole });
+
+// Receipt Relationships
+Receipt.hasMany(ReceiptLineItem, { foreignKey: 'ReceiptID', onDelete: 'CASCADE' });
+ReceiptLineItem.belongsTo(Receipt, { foreignKey: 'ReceiptID' });
+
+// ReceiptLineItem belongs to Product
+ReceiptLineItem.belongsTo(Product, { foreignKey: 'ProductID' });
+Product.hasMany(ReceiptLineItem, { foreignKey: 'ProductID' });
+
+// Purchase Order Relationships
+PurchaseOrder.hasMany(PurchaseOrderLineItem, { foreignKey: 'PurchaseOrderID', onDelete: 'CASCADE' });
+PurchaseOrderLineItem.belongsTo(PurchaseOrder, { foreignKey: 'PurchaseOrderID' });
+
+PurchaseOrderLineItem.belongsTo(Product, { foreignKey: 'ProductID' });
+Product.hasMany(PurchaseOrderLineItem, { foreignKey: 'ProductID' });
+
+PurchaseOrder.hasMany(Receipt, { foreignKey: 'PurchaseOrderID' });
+Receipt.belongsTo(PurchaseOrder, { foreignKey: 'PurchaseOrderID' });
+
+// Warehouse Location Relationships
+Inventory.belongsTo(WarehouseLocation, { foreignKey: 'LocationID' });
+WarehouseLocation.hasMany(Inventory, { foreignKey: 'LocationID' });
+
+StockMovement.belongsTo(WarehouseLocation, { foreignKey: 'FromLocationID', as: 'FromLocation' });
+WarehouseLocation.hasMany(StockMovement, { foreignKey: 'FromLocationID', as: 'DepartingMovements' });
+
+StockMovement.belongsTo(WarehouseLocation, { foreignKey: 'ToLocationID', as: 'ToLocation' });
+WarehouseLocation.hasMany(StockMovement, { foreignKey: 'ToLocationID', as: 'ArrivingMovements' });
+
+// Inventory Relationships
+Inventory.belongsTo(ProductLot, { foreignKey: 'ProductLotID' });
+ProductLot.hasMany(Inventory, { foreignKey: 'ProductLotID' });
+
+ProductLot.belongsTo(Product, { foreignKey: 'ProductID' });
+Product.hasMany(ProductLot, { foreignKey: 'ProductID' });
+
+// Outbound Order Relationships
 OutboundOrder.hasMany(OutboundOrderLineItem, { foreignKey: 'OrderID', onDelete: 'CASCADE' });
 OutboundOrderLineItem.belongsTo(OutboundOrder, { foreignKey: 'OrderID' });
 
 OutboundOrderLineItem.belongsTo(Product, { foreignKey: 'ProductID' });
 Product.hasMany(OutboundOrderLineItem, { foreignKey: 'ProductID' });
 
-// --- Shipment Relationships ---
+OutboundOrder.belongsTo(Address, { foreignKey: 'ShippingAddressID', as: 'ShippingAddress' });
+Address.hasMany(OutboundOrder, { foreignKey: 'ShippingAddressID', as: 'ShippingOrders' });
+
+OutboundOrder.belongsTo(Address, { foreignKey: 'BillingAddressID', as: 'BillingAddress' });
+Address.hasMany(OutboundOrder, { foreignKey: 'BillingAddressID', as: 'BillingOrders' });
+
+// Shipment Relationships
 Shipment.belongsTo(OutboundOrder, { foreignKey: 'OrderID' });
 OutboundOrder.hasMany(Shipment, { foreignKey: 'OrderID' });
-
-Shipment.belongsTo(User, { foreignKey: 'ShippedByUserID', as: 'Shipper' });
-User.hasMany(Shipment, { foreignKey: 'ShippedByUserID', as: 'ShippedItems' });
 
 Shipment.hasMany(ShipmentLineItem, { foreignKey: 'ShipmentID', onDelete: 'CASCADE' });
 ShipmentLineItem.belongsTo(Shipment, { foreignKey: 'ShipmentID' });
@@ -83,18 +181,12 @@ OutboundOrderLineItem.hasMany(ShipmentLineItem, { foreignKey: 'OrderItemID' });
 ShipmentLineItem.belongsTo(Product, { foreignKey: 'ProductID' });
 Product.hasMany(ShipmentLineItem, { foreignKey: 'ProductID' });
 
-// --- Return Authorization Relationships ---
+// Return Authorization Relationships
 ReturnAuthorization.belongsTo(OutboundOrder, { foreignKey: 'OrderID' });
 OutboundOrder.hasMany(ReturnAuthorization, { foreignKey: 'OrderID' });
 
 ReturnAuthorization.belongsTo(Shipment, { foreignKey: 'ShipmentID' });
 Shipment.hasMany(ReturnAuthorization, { foreignKey: 'ShipmentID' });
-
-ReturnAuthorization.belongsTo(User, { foreignKey: 'RequestedByUserID', as: 'ReturnRequestor' });
-User.hasMany(ReturnAuthorization, { foreignKey: 'RequestedByUserID', as: 'RequestedReturns' });
-
-ReturnAuthorization.belongsTo(User, { foreignKey: 'ApprovedByUserID', as: 'ReturnApprover' });
-User.hasMany(ReturnAuthorization, { foreignKey: 'ApprovedByUserID', as: 'ApprovedReturns' });
 
 ReturnAuthorization.hasMany(ReturnAuthorizationLineItem, { foreignKey: 'RMAID', onDelete: 'CASCADE' });
 ReturnAuthorizationLineItem.belongsTo(ReturnAuthorization, { foreignKey: 'RMAID' });
@@ -105,34 +197,23 @@ OutboundOrderLineItem.hasMany(ReturnAuthorizationLineItem, { foreignKey: 'OrderI
 ReturnAuthorizationLineItem.belongsTo(Product, { foreignKey: 'ProductID' });
 Product.hasMany(ReturnAuthorizationLineItem, { foreignKey: 'ProductID' });
 
-// --- Product Category Relationship ---
-Product.belongsTo(ProductCategory, { foreignKey: 'CategoryID' });
-ProductCategory.hasMany(Product, { foreignKey: 'CategoryID' });
+// Address Relationships
+Supplier.belongsTo(Address, { foreignKey: 'AddressID' });
+Address.hasMany(Supplier, { foreignKey: 'AddressID', as: 'Suppliers' });
 
-// --- Unit of Measure Relationships ---
-// You might want to link UnitOfMeasure to Product if products have standard UOM
-Product.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID', as: 'BaseUnit' });
-UnitOfMeasure.hasMany(Product, { foreignKey: 'UOMID', as: 'BaseProducts' });
+PurchaseOrder.belongsTo(Address, { foreignKey: 'ShippingAddressID', as: 'ShippingAddress' });
+Address.hasMany(PurchaseOrder, { foreignKey: 'ShippingAddressID', as: 'ShippingPOs' });
 
-// Link UnitOfMeasure to relevant line item tables if needed for specific order/receipt UOM
-ReceiptLineItem.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID' });
-UnitOfMeasure.hasMany(ReceiptLineItem, { foreignKey: 'UOMID' });
+PurchaseOrder.belongsTo(Address, { foreignKey: 'BillingAddressID', as: 'BillingAddress' });
+Address.hasMany(PurchaseOrder, { foreignKey: 'BillingAddressID', as: 'BillingPOs' });
 
-PurchaseOrderLineItem.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID' });
-UnitOfMeasure.hasMany(PurchaseOrderLineItem, { foreignKey: 'UOMID' });
+OutboundOrder.belongsTo(Address, { foreignKey: 'ShippingAddressID', as: 'ShippingAddress' });
+Address.hasMany(OutboundOrder, { foreignKey: 'ShippingAddressID', as: 'ShippingOrders' });
 
-OutboundOrderLineItem.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID' });
-UnitOfMeasure.hasMany(OutboundOrderLineItem, { foreignKey: 'UOMID' });
+OutboundOrder.belongsTo(Address, { foreignKey: 'BillingAddressID', as: 'BillingAddress' });
+Address.hasMany(OutboundOrder, { foreignKey: 'BillingAddressID', as: 'BillingOrders' });
 
-// --- Linking Receipts to Purchase Orders ---
-Receipt.belongsTo(PurchaseOrder, { foreignKey: 'PurchaseOrderID' });
-PurchaseOrder.hasMany(Receipt, { foreignKey: 'PurchaseOrderID' });
-
-// --- Linking Receipt Line Items to Purchase Order Line Items (Optional - for tracking received against ordered) ---
-ReceiptLineItem.belongsTo(PurchaseOrderLineItem, { foreignKey: 'PurchaseOrderLineItemID' });
-PurchaseOrderLineItem.hasMany(ReceiptLineItem, { foreignKey: 'PurchaseOrderLineItemID' });
-
-
+// Export the models
 // Export the models
 module.exports = {
     Receipt,
@@ -153,5 +234,10 @@ module.exports = {
     ReturnAuthorizationLineItem,
     ProductCategory,
     UnitOfMeasure,
+    Address,
+    Role,
+    UserRole,
+    StockTake,
+    StockTakeItem,
     sequelize
 };
