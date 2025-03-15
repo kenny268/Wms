@@ -1,3 +1,6 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
 // New Entity: PurchaseOrderLineItem
 const PurchaseOrderLineItem = sequelize.define('PurchaseOrderLineItem', {
     PurchaseOrderLineItemID: {
@@ -5,13 +8,22 @@ const PurchaseOrderLineItem = sequelize.define('PurchaseOrderLineItem', {
         primaryKey: true,
         autoIncrement: true,
     },
-    PurchaseOrderID: {
+    PurchaseOrderID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'PurchaseOrders',
+            key: 'PurchaseOrderID',
+            onDelete: 'CASCADE'
+        }
     },
-    ProductID: {
+    ProductID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'Products',
+            key: 'ProductID'
+        }
     },
     QuantityOrdered: {
         type: DataTypes.INTEGER,
@@ -30,4 +42,13 @@ const PurchaseOrderLineItem = sequelize.define('PurchaseOrderLineItem', {
     Notes: {
         type: DataTypes.TEXT,
     },
+    UOMID: { // Foreign key for UnitOfMeasure
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'UnitOfMeasures',
+            key: 'UOMID'
+        }
+    },
 });
+
+module.exports = PurchaseOrderLineItem;

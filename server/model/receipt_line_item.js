@@ -1,9 +1,28 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
 // Define the ReceiptLineItem model
 const ReceiptLineItem = sequelize.define('ReceiptLineItem', {
     ReceiptLineItemID: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
+    },
+    ReceiptID: { // Foreign key
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'Receipts',
+            key: 'ReceiptID',
+            onDelete: 'CASCADE'
+        }
+    },
+    ProductID: { // Foreign key
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'Products',
+            key: 'ProductID'
+        }
     },
     ExpectedQuantity: {
         type: DataTypes.INTEGER,
@@ -32,4 +51,24 @@ const ReceiptLineItem = sequelize.define('ReceiptLineItem', {
     CountryOfOrigin: {
         type: DataTypes.STRING(100),
     },
+    UOMID: { // Foreign key for UnitOfMeasure
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'UnitOfMeasures',
+            key: 'UOMID'
+        }
+    },
+    PurchaseOrderLineItemID: { // Optional link to PO line item
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'PurchaseOrderLineItems',
+            key: 'PurchaseOrderLineItemID'
+        }
+    },
+},
+{
+    timestamps: true,
+    tableName: 'receipt_line_item',
 });
+
+module.exports = ReceiptLineItem;

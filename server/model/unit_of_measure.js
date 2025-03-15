@@ -1,3 +1,6 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
 // New Entity: UnitOfMeasure
 const UnitOfMeasure = sequelize.define('UnitOfMeasure', {
     UOMID: {
@@ -18,3 +21,5 @@ const UnitOfMeasure = sequelize.define('UnitOfMeasure', {
         type: DataTypes.TEXT,
     },
 });
+
+module.exports = UnitOfMeasure;

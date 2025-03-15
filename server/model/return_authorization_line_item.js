@@ -1,3 +1,6 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
 // New Entity: ReturnAuthorizationLineItem
 const ReturnAuthorizationLineItem = sequelize.define('ReturnAuthorizationLineItem', {
     RMALineItemID: {
@@ -5,16 +8,29 @@ const ReturnAuthorizationLineItem = sequelize.define('ReturnAuthorizationLineIte
         primaryKey: true,
         autoIncrement: true,
     },
-    RMAID: {
+    RMAID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'ReturnAuthorizations',
+            key: 'RMAID',
+            onDelete: 'CASCADE'
+        }
     },
-    OrderItemID: {
+    OrderItemID: { // Foreign key
         type: DataTypes.INTEGER,
+        references: {
+            model: 'OutboundOrderLineItems',
+            key: 'OrderItemID'
+        }
     },
-    ProductID: {
+    ProductID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'Products',
+            key: 'ProductID'
+        }
     },
     QuantityReturned: {
         type: DataTypes.INTEGER,
@@ -26,4 +42,11 @@ const ReturnAuthorizationLineItem = sequelize.define('ReturnAuthorizationLineIte
     Notes: {
         type: DataTypes.TEXT,
     },
+},
+{
+    timestamps: false,
+    tableName: 'return_authorization_line_items',
 });
+
+
+module.exports = ReturnAuthorizationLineItem;

@@ -1,3 +1,6 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
 // New Entity: OutboundOrder
 const OutboundOrder = sequelize.define('OutboundOrder', {
     OrderID: {
@@ -14,22 +17,38 @@ const OutboundOrder = sequelize.define('OutboundOrder', {
         type: DataTypes.DATE,
         allowNull: false,
     },
-    CustomerID: { // Assuming you might have customer information
+    CustomerID: { // Foreign key (assuming Customer model exists)
         type: DataTypes.INTEGER,
+        references: {
+            model: 'Customers', // Assuming Customer model name
+            key: 'CustomerID'
+        }
     },
     OrderStatus: {
         type: DataTypes.STRING(50),
-        defaultValue: 'Pending', // e.g., Pending, Processing, Shipped, Delivered, Cancelled
+        defaultValue: 'Pending',
     },
-    OrderCreatedByUserID: {
+    OrderCreatedByUserID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'Users',
+            key: 'UserID'
+        }
     },
-    ShippingAddress: {
-        type: DataTypes.TEXT,
+    ShippingAddressID: { // Foreign key
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'Addresses',
+            key: 'AddressID'
+        }
     },
-    BillingAddress: {
-        type: DataTypes.TEXT,
+    BillingAddressID: { // Foreign key
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'Addresses',
+            key: 'AddressID'
+        }
     },
     ShippingMethod: {
         type: DataTypes.STRING(100),
@@ -44,4 +63,17 @@ const OutboundOrder = sequelize.define('OutboundOrder', {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
     },
-});
+},
+{
+    timestamps: true,
+    tableName: 'outbound_orders',
+    indexes: [
+        {
+            unique: true,
+            fields: ['OrderNumber']
+        }
+    ]
+}
+);
+
+module.exports = OutboundOrder;

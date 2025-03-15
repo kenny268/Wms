@@ -1,3 +1,6 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
 // New Entity: OutboundOrderLineItem
 const OutboundOrderLineItem = sequelize.define('OutboundOrderLineItem', {
     OrderItemID: {
@@ -5,13 +8,22 @@ const OutboundOrderLineItem = sequelize.define('OutboundOrderLineItem', {
         primaryKey: true,
         autoIncrement: true,
     },
-    OrderID: {
+    OrderID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'OutboundOrders',
+            key: 'OrderID',
+            onDelete: 'CASCADE'
+        }
     },
-    ProductID: {
+    ProductID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'Products',
+            key: 'ProductID'
+        }
     },
     QuantityOrdered: {
         type: DataTypes.INTEGER,
@@ -31,4 +43,17 @@ const OutboundOrderLineItem = sequelize.define('OutboundOrderLineItem', {
     Notes: {
         type: DataTypes.TEXT,
     },
+    UOMID: { // Foreign key for UnitOfMeasure
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'UnitOfMeasures',
+            key: 'UOMID'
+        }
+    },
+},
+{
+    timestamps: false,
+    tableName: 'outbound_order_line_items',
 });
+
+module.exports = OutboundOrderLineItem;

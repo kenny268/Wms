@@ -1,3 +1,6 @@
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/db';
+
 // New Entity: Inventory
 const Inventory = sequelize.define('Inventory', {
     InventoryID: {
@@ -5,13 +8,21 @@ const Inventory = sequelize.define('Inventory', {
         primaryKey: true,
         autoIncrement: true,
     },
-    ProductID: {
+    ProductLotID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'ProductLots',
+            key: 'ProductLotID'
+        }
     },
-    LocationID: {
+    LocationID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'WarehouseLocations',
+            key: 'LocationID'
+        }
     },
     QuantityOnHand: {
         type: DataTypes.INTEGER,
@@ -20,19 +31,7 @@ const Inventory = sequelize.define('Inventory', {
     },
     QuantityAllocated: {
         type: DataTypes.INTEGER,
-        defaultValue: 0, // Quantity reserved for outbound orders
-    },
-    QuantityAvailable: {
-        type: DataTypes.INTEGER,
-        get() {
-            return this.getDataValue('QuantityOnHand') - this.getDataValue('QuantityAllocated');
-        },
-    },
-    LotNumber: {
-        type: DataTypes.STRING,
-    },
-    ExpirationDate: {
-        type: DataTypes.DATEONLY,
+        defaultValue: 0,
     },
     SerialNumber: {
         type: DataTypes.STRING,
@@ -47,4 +46,18 @@ const Inventory = sequelize.define('Inventory', {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
     },
-});
+},
+{
+    timestamps: true,
+    tableName: 'inventories',
+    indexes: [
+        {
+            unique: true,
+            fields: ['ProductLotID', 'LocationID']
+        }
+    ]
+}
+);
+
+
+module.exports = Inventory;

@@ -1,3 +1,6 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
 // Define the Receipt model
 const Receipt = sequelize.define('Receipt', {
     ReceiptID: {
@@ -61,4 +64,38 @@ const Receipt = sequelize.define('Receipt', {
     SampleSizeInspected: {
         type: DataTypes.INTEGER,
     },
+    SupplierID: { // Foreign key
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'Suppliers',
+            key: 'SupplierID'
+        }
+    },
+    ReceiverUserID: { // Foreign key (as Receiver)
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'Users',
+            key: 'UserID'
+        }
+    },
+    InspectorUserID: { // Foreign key (as Inspector)
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'Users',
+            key: 'UserID'
+        }
+    },
+    PurchaseOrderID: { // Foreign key
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'PurchaseOrders',
+            key: 'PurchaseOrderID'
+        }
+    },
+},
+{
+    timestamps: true,
+    tableName: 'receipt',
 });
+
+module.exports = Receipt;

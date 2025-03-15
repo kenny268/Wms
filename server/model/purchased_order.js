@@ -1,3 +1,6 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
 // New Entity: PurchaseOrder
 const PurchaseOrder = sequelize.define('PurchaseOrder', {
     PurchaseOrderID: {
@@ -14,17 +17,25 @@ const PurchaseOrder = sequelize.define('PurchaseOrder', {
         type: DataTypes.DATE,
         allowNull: false,
     },
-    SupplierID: {
+    SupplierID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'Suppliers',
+            key: 'SupplierID'
+        }
     },
-    OrderCreatedByUserID: {
+    OrderCreatedByUserID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'Users',
+            key: 'UserID'
+        }
     },
     OrderStatus: {
         type: DataTypes.STRING(50),
-        defaultValue: 'Pending', // e.g., Pending, Approved, Partially Received, Received, Cancelled
+        defaultValue: 'Pending',
     },
     TotalAmount: {
         type: DataTypes.DECIMAL(15, 2),
@@ -32,11 +43,19 @@ const PurchaseOrder = sequelize.define('PurchaseOrder', {
     ExpectedDeliveryDate: {
         type: DataTypes.DATEONLY,
     },
-    ShippingAddress: {
-        type: DataTypes.TEXT,
+    ShippingAddressID: { // Foreign key
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'Addresses',
+            key: 'AddressID'
+        }
     },
-    BillingAddress: {
-        type: DataTypes.TEXT,
+    BillingAddressID: { // Foreign key
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'Addresses',
+            key: 'AddressID'
+        }
     },
     Notes: {
         type: DataTypes.TEXT,
@@ -46,3 +65,6 @@ const PurchaseOrder = sequelize.define('PurchaseOrder', {
         defaultValue: DataTypes.NOW,
     },
 });
+
+
+module.exports = PurchaseOrder;

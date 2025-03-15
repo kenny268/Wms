@@ -1,3 +1,6 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
 // New Entity: ReturnAuthorization (RMA)
 const ReturnAuthorization = sequelize.define('ReturnAuthorization', {
     RMAID: {
@@ -10,11 +13,19 @@ const ReturnAuthorization = sequelize.define('ReturnAuthorization', {
         unique: true,
         allowNull: false,
     },
-    OrderID: {
+    OrderID: { // Foreign key
         type: DataTypes.INTEGER,
+        references: {
+            model: 'OutboundOrders',
+            key: 'OrderID'
+        }
     },
-    ShipmentID: {
+    ShipmentID: { // Foreign key
         type: DataTypes.INTEGER,
+        references: {
+            model: 'Shipments',
+            key: 'ShipmentID'
+        }
     },
     ReturnDate: {
         type: DataTypes.DATE,
@@ -25,13 +36,21 @@ const ReturnAuthorization = sequelize.define('ReturnAuthorization', {
     },
     ReturnStatus: {
         type: DataTypes.STRING(50),
-        defaultValue: 'Pending', // e.g., Pending, Approved, Received, Inspected, Resolved
+        defaultValue: 'Pending',
     },
-    RequestedByUserID: {
+    RequestedByUserID: { // Foreign key
         type: DataTypes.INTEGER,
+        references: {
+            model: 'Users',
+            key: 'UserID'
+        }
     },
-    ApprovedByUserID: {
+    ApprovedByUserID: { // Foreign key
         type: DataTypes.INTEGER,
+        references: {
+            model: 'Users',
+            key: 'UserID'
+        }
     },
     Notes: {
         type: DataTypes.TEXT,
@@ -40,4 +59,10 @@ const ReturnAuthorization = sequelize.define('ReturnAuthorization', {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
     },
+},
+{
+    timestamps: false,
+    freezeTableName: true,
 });
+
+module.exports = ReturnAuthorization;

@@ -1,3 +1,6 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
 // New Entity: ShipmentLineItem (Details of products in a shipment)
 const ShipmentLineItem = sequelize.define('ShipmentLineItem', {
     ShipmentLineItemID: {
@@ -5,17 +8,29 @@ const ShipmentLineItem = sequelize.define('ShipmentLineItem', {
         primaryKey: true,
         autoIncrement: true,
     },
-    ShipmentID: {
+    ShipmentID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'Shipments',
+            key: 'ShipmentID',
+            onDelete: 'CASCADE'
+        }
     },
-    OrderItemID: {
+    OrderItemID: { // Foreign key
         type: DataTypes.INTEGER,
-        allowNull: false,
+        references: {
+            model: 'OutboundOrderLineItems',
+            key: 'OrderItemID'
+        }
     },
-    ProductID: {
+    ProductID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'Products',
+            key: 'ProductID'
+        }
     },
     QuantityShipped: {
         type: DataTypes.INTEGER,
@@ -27,4 +42,10 @@ const ShipmentLineItem = sequelize.define('ShipmentLineItem', {
     SerialNumber: {
         type: DataTypes.STRING,
     },
+},
+{
+    timestamps: false,
+    tableName: 'shipment_line_items',
 });
+
+module.exports = ShipmentLineItem;

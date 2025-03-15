@@ -1,4 +1,6 @@
-// Define the Product model
+const { DataTypes } = require('sequelize ')
+const sequelize = require('../config/db')
+
 const Product = sequelize.define('Product', {
     ProductID: {
         type: DataTypes.INTEGER,
@@ -23,4 +25,13 @@ const Product = sequelize.define('Product', {
     Weight: {
         type: DataTypes.DECIMAL(10, 2),
     },
+    CategoryID: {
+        type: DataTypes.INTEGER, // Foreign key for ProductCategory
+    },
+    UOMID: {
+        type: DataTypes.INTEGER, // Foreign key for Base Unit of Measure
+    },
 });
+
+
+module.exports = Product;

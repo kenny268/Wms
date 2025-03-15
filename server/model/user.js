@@ -1,3 +1,6 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
 // Define the User model
 const User = sequelize.define('User', {
     UserID: {
@@ -10,4 +13,10 @@ const User = sequelize.define('User', {
         unique: true,
         allowNull: false,
     },
+},
+{
+    timestamps: true,
+    tableName: 'user',
 });
+
+module.exports = User;

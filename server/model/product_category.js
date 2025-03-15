@@ -1,3 +1,6 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
 // New Entity: ProductCategory
 const ProductCategory = sequelize.define('ProductCategory', {
     CategoryID: {
@@ -13,4 +16,10 @@ const ProductCategory = sequelize.define('ProductCategory', {
     Description: {
         type: DataTypes.TEXT,
     },
+},
+{
+    timestamps: true,
+    tableName: 'product_categories',
 });
+
+module.exports = ProductCategory;

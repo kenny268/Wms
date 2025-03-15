@@ -1,3 +1,6 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
 // New Entity: StockMovement
 const StockMovement = sequelize.define('StockMovement', {
     StockMovementID: {
@@ -9,15 +12,27 @@ const StockMovement = sequelize.define('StockMovement', {
         type: DataTypes.ENUM('Inbound', 'Outbound', 'Transfer', 'Adjustment'),
         allowNull: false,
     },
-    ProductID: {
+    ProductID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'Products',
+            key: 'ProductID'
+        }
     },
-    FromLocationID: {
+    FromLocationID: { // Foreign key
         type: DataTypes.INTEGER,
+        references: {
+            model: 'WarehouseLocations',
+            key: 'LocationID'
+        }
     },
-    ToLocationID: {
+    ToLocationID: { // Foreign key
         type: DataTypes.INTEGER,
+        references: {
+            model: 'WarehouseLocations',
+            key: 'LocationID'
+        }
     },
     Quantity: {
         type: DataTypes.INTEGER,
@@ -28,16 +43,20 @@ const StockMovement = sequelize.define('StockMovement', {
         defaultValue: DataTypes.NOW,
     },
     ReferenceID: {
-        type: DataTypes.INTEGER, // Could be ReceiptID, ShipmentID, etc.
+        type: DataTypes.INTEGER,
     },
     ReferenceType: {
-        type: DataTypes.STRING(50), // e.g., 'Receipt', 'Shipment', 'StockTake'
+        type: DataTypes.STRING(50),
     },
     Reason: {
-        type: DataTypes.STRING(255), // For adjustments or transfers
+        type: DataTypes.STRING(255),
     },
-    UserID: {
-        type: DataTypes.INTEGER, // User who performed the movement
+    UserID: { // Foreign key
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'Users',
+            key: 'UserID'
+        }
     },
     Notes: {
         type: DataTypes.TEXT,
@@ -47,3 +66,5 @@ const StockMovement = sequelize.define('StockMovement', {
         defaultValue: DataTypes.NOW,
     },
 });
+
+module.exports = StockMovement;

@@ -1,3 +1,6 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
 // New Entity: Shipment
 const Shipment = sequelize.define('Shipment', {
     ShipmentID: {
@@ -5,9 +8,13 @@ const Shipment = sequelize.define('Shipment', {
         primaryKey: true,
         autoIncrement: true,
     },
-    OrderID: {
+    OrderID: { // Foreign key
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'OutboundOrders',
+            key: 'OrderID'
+        }
     },
     ShipmentNumber: {
         type: DataTypes.STRING,
@@ -27,8 +34,12 @@ const Shipment = sequelize.define('Shipment', {
     ShippingCost: {
         type: DataTypes.DECIMAL(10, 2),
     },
-    ShippedByUserID: {
+    ShippedByUserID: { // Foreign key
         type: DataTypes.INTEGER,
+        references: {
+            model: 'Users',
+            key: 'UserID'
+        }
     },
     DepartureTime: {
         type: DataTypes.DATE,
@@ -50,3 +61,5 @@ const Shipment = sequelize.define('Shipment', {
         defaultValue: DataTypes.NOW,
     },
 });
+
+module.exports = Shipment;
