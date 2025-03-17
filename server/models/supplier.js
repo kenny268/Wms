@@ -8,10 +8,30 @@ const Supplier = sequelize.define('Supplier', {
         primaryKey: true,
         autoIncrement: true,
     },
-    SupplierName: {
+    CompanyName: {
         type: DataTypes.STRING,
-        allowNull: false,
+        unique: true,
+        allowNull
     },
+    ContactName: {
+        type: DataTypes.STRING,
+    },
+    ContactTitle: {
+        type: DataTypes.STRING,
+    },
+    Phone: {
+        type: DataTypes.STRING,
+    },
+    Fax: {
+        type: DataTypes.STRING,
+    },
+    Email: {
+        type: DataTypes.STRING,
+    },
+    HomePage: {
+        type: DataTypes.STRING,
+    },
+
     AddressID: { // Foreign key for default Address
         type: DataTypes.INTEGER,
         references: {
