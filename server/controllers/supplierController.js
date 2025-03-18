@@ -1,135 +1,95 @@
-const Supplier = require('../models/Supplier'); // Import the Supplier model
+const supplierService = require('../services/supplierService');
+const { validationResult } = require('express-validator');
+const logger = require('../utils/logger');
 
-// Create a new Supplier
-exports.createSupplierWithAddress = async (req, res) => {
-    try {
-        const {
-            CompanyName,
-            ContactName,
-            ContactTitle,
-            Phone,
-            Fax,
-            Email,
-            HomePage,
-            AddressLine1,
-            AddressLine2,
-            City,
-            StateProvince,
-            PostalCode,
-            Country,
-            AddressType
-        } = req.body;
-
-        // 1. First create the Address
-        const newAddress = await Address.create({
-            AddressLine1,
-            AddressLine2,
-            City,
-            StateProvince,
-            PostalCode,
-            Country,
-            AddressType
-        });
-
-        // 2. Create the Supplier and associate it with the newly created Address
-        const newSupplier = await Supplier.create({
-            CompanyName,
-            ContactName,
-            ContactTitle,
-            Phone,
-            Fax,
-            Email,
-            HomePage,
-            AddressID: newAddress.AddressID  // Link the Supplier to the Address
-        });
-
-        // 3. Return the new supplier with the associated address
-        return res.status(201).json({
-            supplier: newSupplier,
-            address: newAddress
-        });
-
-    } catch (error) {
-        console.error('Error creating supplier with address:', error);
-        return res.status(500).json({ message: 'Server error' });
+// Middleware to handle validation results
+const handleValidationErrors = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
     }
+    next();
 };
 
-// Get all suppliers
-exports.getAllSuppliers = async (req, res) => {
+const createSupplier = async (req, res) => {
     try {
-        const suppliers = await Supplier.findAll();
-        return res.status(200).json(suppliers);
+        const newSupplier = await supplierService.createSupplier(req.body);
+        return res.status(201).json(newSupplier);
     } catch (error) {
-        console.error("Error fetching suppliers: ", error);
-        return res.status(500).json({ message: "Server error" });
-    }
-};
-
-// Get a single supplier by ID
-exports.getSupplierById = async (req, res) => {
-    const { id } = req.params;
-    
-    try {
-        const supplier = await Supplier.findByPk(id);
-        
-        if (!supplier) {
-            return res.status(404).json({ message: "Supplier not found" });
+        logger.error(`Error creating supplier: ${error.message}`, { body: req.body });
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            return res.status(409).json({ message: 'Supplier with this name already exists.' });
         }
+        return res.status(500).json({ error: error.message || 'Internal Server Error' });
+    }
+};
 
+const getAllSuppliers = async (req, res) => {
+    try {
+        const filters = {
+            supplierName: req.query.supplierName,
+            city: req.query.city,
+            country: req.query.country,
+        };
+        const pagination = {
+            page: req.query.page || 1,
+            limit: req.query.limit || 20,
+        };
+        const { count, rows } = await supplierService.getAllSuppliers(filters, pagination);
+        return res.status(200).json({ count, rows });
+    } catch (error) {
+        logger.error(`Error retrieving suppliers: ${error.message}`, { query: req.query });
+        return res.status(500).json({ error: error.message || 'Internal Server Error' });
+    }
+};
+
+const getSupplierById = async (req, res) => {
+    try {
+        const supplier = await supplierService.getSupplierById(req.params.id);
+        if (!supplier) {
+            return res.status(404).json({ message: `Supplier with ID ${req.params.id} not found.` });
+        }
         return res.status(200).json(supplier);
     } catch (error) {
-        console.error("Error fetching supplier: ", error);
-        return res.status(500).json({ message: "Server error" });
+        logger.error(`Error retrieving supplier by ID: ${error.message}`, { params: req.params });
+        return res.status(500).json({ error: error.message || 'Internal Server Error' });
     }
 };
 
-// Update an existing supplier
-exports.updateSupplier = async (req, res) => {
-    const { id } = req.params;
-    const { CompanyName, ContactName, ContactTitle, Phone, Fax, Email, HomePage, AddressID } = req.body;
-
+const updateSupplier = async (req, res) => {
     try {
-        const supplier = await Supplier.findByPk(id);
-        
-        if (!supplier) {
-            return res.status(404).json({ message: "Supplier not found" });
+        const updatedSupplier = await supplierService.updateSupplier(req.params.id, req.body);
+        if (!updatedSupplier) {
+            return res.status(404).json({ message: `Supplier with ID ${req.params.id} not found.` });
         }
-
-        // Update supplier details
-        supplier.CompanyName = CompanyName || supplier.CompanyName;
-        supplier.ContactName = ContactName || supplier.ContactName;
-        supplier.ContactTitle = ContactTitle || supplier.ContactTitle;
-        supplier.Phone = Phone || supplier.Phone;
-        supplier.Fax = Fax || supplier.Fax;
-        supplier.Email = Email || supplier.Email;
-        supplier.HomePage = HomePage || supplier.HomePage;
-        supplier.AddressID = AddressID || supplier.AddressID;
-
-        await supplier.save(); // Save the updated supplier
-
-        return res.status(200).json(supplier);
+        return res.status(200).json(updatedSupplier);
     } catch (error) {
-        console.error("Error updating supplier: ", error);
-        return res.status(500).json({ message: "Server error" });
+        logger.error(`Error updating supplier: ${error.message}`, { params: req.params, body: req.body });
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            return res.status(409).json({ message: 'Supplier with this name already exists.' });
+        }
+        return res.status(500).json({ error: error.message || 'Internal Server Error' });
     }
 };
 
-// Delete a supplier
-exports.deleteSupplier = async (req, res) => {
-    const { id } = req.params;
-    
+const deleteSupplier = async (req, res) => {
     try {
-        const supplier = await Supplier.findByPk(id);
-
-        if (!supplier) {
-            return res.status(404).json({ message: "Supplier not found" });
+        const isDeleted = await supplierService.deleteSupplier(req.params.id);
+        if (!isDeleted) {
+            return res.status(404).json({ message: `Supplier with ID ${req.params.id} not found.` });
         }
-
-        await supplier.destroy(); // Delete the supplier
-        return res.status(204).json(); // Respond with no content after deletion
+        return res.status(204).send();
     } catch (error) {
-        console.error("Error deleting supplier: ", error);
-        return res.status(500).json({ message: "Server error" });
+        logger.error(`Error deleting supplier: ${error.message}`, { params: req.params });
+        return res.status(500).json({ error: error.message || 'Internal Server Error' });
     }
+};
+
+module.exports = {
+    handleValidationErrors,
+    createSupplier,
+    getAllSuppliers,
+    getSupplierById,
+    updateSupplier,
+    deleteSupplier,
 };
