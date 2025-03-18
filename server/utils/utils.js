@@ -14,6 +14,7 @@ exports.createOrUpdateAddress = async (addressData, existingAddressId) => {
     }
 }
 
+// Helper function to handle validation errors
 exports.handleValidationErrors = (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
