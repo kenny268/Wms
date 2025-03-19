@@ -1,4 +1,5 @@
 const { Address ,ProductLot, Inventory} = require('../models');
+const { rateLimit } = require('express-rate-limit');
 
 exports.createOrUpdateAddress = async (addressData, existingAddressId) => {
     if (!addressData) {
@@ -81,5 +82,23 @@ exports.findOrCreateProductLot = async (transaction, ProductID, LotNumber, Expir
     });
     return productLot;
 };
+
+// Rate limiter for registration
+exports.registerLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour window
+    max: 5, // Limit each IP to 5 create account requests per windowMs
+    message: 'Too many account creation requests from this IP, please try again after an hour',
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+// Rate limiter for login
+exports.loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minute window
+    max: 20, // Limit each IP to 20 login requests per windowMs
+    message: 'Too many login attempts from this IP, please try again after 15 minutes',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 
 
