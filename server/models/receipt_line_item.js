@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const { sequelize, DataTypes } = require('../config/db');
+
 
 // Define the ReceiptLineItem model
 const ReceiptLineItem = sequelize.define('ReceiptLineItem', {

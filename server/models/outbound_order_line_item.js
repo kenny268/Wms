@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const { sequelize, DataTypes } = require('../config/db');
+
 
 // New Entity: OutboundOrderLineItem
 const OutboundOrderLineItem = sequelize.define('OutboundOrderLineItem', {
@@ -53,7 +53,7 @@ const OutboundOrderLineItem = sequelize.define('OutboundOrderLineItem', {
 },
 {
     timestamps: false,
-    tableName: 'outbound_order_line_items',
+    tableName: 'OutboundOrderLineItems',
 });
 
 module.exports = OutboundOrderLineItem;

@@ -1,3 +1,5 @@
+const { sequelize, DataTypes } = require('../config/db');
+
 const ProductLot = sequelize.define('ProductLot', {
     ProductLotID: {
         type: DataTypes.INTEGER,

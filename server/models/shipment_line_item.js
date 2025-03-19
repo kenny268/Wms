@@ -1,5 +1,4 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const { sequelize, DataTypes } = require('../config/db');
 
 // New Entity: ShipmentLineItem (Details of products in a shipment)
 const ShipmentLineItem = sequelize.define('ShipmentLineItem', {

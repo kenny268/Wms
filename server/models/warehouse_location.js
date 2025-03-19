@@ -1,5 +1,4 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const { sequelize, DataTypes } = require('../config/db');
 
 // New Entity: WarehouseLocation
 const WarehouseLocation = sequelize.define('WarehouseLocation', {
@@ -41,7 +40,7 @@ const WarehouseLocation = sequelize.define('WarehouseLocation', {
 },
 {
     timestamps: true,
-    tableName: 'warehouse_locations',
+    tableName: 'WarehouseLocations',
 }
 );
 

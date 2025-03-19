@@ -7,7 +7,7 @@ const ReceiptLineItem = require('./receipt_line_item');
 const Product = require('./product');
 const Supplier = require('./supplier');
 const User = require('./user');
-const PurchaseOrder = require('./purchase_order');
+const PurchaseOrder = require('./purchased_order');
 const PurchaseOrderLineItem = require('./purchase_order_line_item');
 const WarehouseLocation = require('./warehouse_location');
 const Inventory = require('./inventory');
@@ -36,14 +36,21 @@ WarehouseLocation.hasMany(WarehouseLocation, { foreignKey: 'ParentLocationID', a
 Inventory.belongsTo(WarehouseLocation, { foreignKey: 'LocationID' });
 WarehouseLocation.hasMany(Inventory, { foreignKey: 'LocationID' });
 
+// Define unique associations for FromLocation and ToLocation once.
 StockMovement.belongsTo(WarehouseLocation, { foreignKey: 'FromLocationID', as: 'FromLocation' });
 WarehouseLocation.hasMany(StockMovement, { foreignKey: 'FromLocationID', as: 'DepartingMovements' });
 
 StockMovement.belongsTo(WarehouseLocation, { foreignKey: 'ToLocationID', as: 'ToLocation' });
 WarehouseLocation.hasMany(StockMovement, { foreignKey: 'ToLocationID', as: 'ArrivingMovements' });
 
+// Association for StockTakeItem and StockMovement
+StockTakeItem.belongsTo(StockMovement, { foreignKey: 'AdjustmentStockMovementID', as: 'AdjustmentMovement' });
+StockMovement.hasMany(StockTakeItem, { foreignKey: 'AdjustmentStockMovementID' });
+
+// Association for StockTakeItem and WarehouseLocation
 StockTakeItem.belongsTo(WarehouseLocation, { foreignKey: 'LocationID' });
 WarehouseLocation.hasMany(StockTakeItem, { foreignKey: 'LocationID' });
+
 
 // --- Stock Take Relationships ---
 StockTake.belongsTo(User, { foreignKey: 'InitiatedByUserID', as: 'Initiator' });
@@ -62,8 +69,6 @@ ProductLot.hasMany(StockTakeItem, { foreignKey: 'ProductLotID' });
 StockTakeItem.belongsTo(User, { foreignKey: 'CountedByUserID', as: 'Counter' });
 User.hasMany(StockTakeItem, { foreignKey: 'CountedByUserID', as: 'CountsPerformed' });
 
-StockTakeItem.belongsTo(StockMovement, { foreignKey: 'AdjustmentStockMovementID', as: 'AdjustmentMovement' });
-StockMovement.hasMany(StockTakeItem, { foreignKey: 'AdjustmentStockMovementID' });
 
 // Product Category Relationship
 Product.belongsTo(ProductCategory, { foreignKey: 'CategoryID' });
@@ -73,14 +78,15 @@ ProductCategory.hasMany(Product, { foreignKey: 'CategoryID' });
 Product.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID', as: 'BaseUnit' });
 UnitOfMeasure.hasMany(Product, { foreignKey: 'UOMID', as: 'BaseProducts' });
 
-ReceiptLineItem.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID' });
-UnitOfMeasure.hasMany(ReceiptLineItem, { foreignKey: 'UOMID' });
+ReceiptLineItem.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID', as: 'UOM' });
+UnitOfMeasure.hasMany(ReceiptLineItem, { foreignKey: 'UOMID', as: 'ReceiptLineItems' });
 
-PurchaseOrderLineItem.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID' });
-UnitOfMeasure.hasMany(PurchaseOrderLineItem, { foreignKey: 'UOMID' });
+PurchaseOrderLineItem.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID', as: 'UOM' });
+UnitOfMeasure.hasMany(PurchaseOrderLineItem, { foreignKey: 'UOMID', as: 'PurchaseOrderLineItems' });
 
-OutboundOrderLineItem.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID' });
-UnitOfMeasure.hasMany(OutboundOrderLineItem, { foreignKey: 'UOMID' });
+OutboundOrderLineItem.belongsTo(UnitOfMeasure, { foreignKey: 'UOMID', as: 'UOM' });
+UnitOfMeasure.hasMany(OutboundOrderLineItem, { foreignKey: 'UOMID', as: 'OutboundOrderLineItems' });
+
 
 // Supplier Relationships
 Supplier.hasMany(PurchaseOrder, { foreignKey: 'SupplierID' });
@@ -89,8 +95,10 @@ PurchaseOrder.belongsTo(Supplier, { foreignKey: 'SupplierID' });
 Supplier.hasMany(Receipt, { foreignKey: 'SupplierID' });
 Receipt.belongsTo(Supplier, { foreignKey: 'SupplierID' });
 
-Supplier.belongsTo(Address, { foreignKey: 'AddressID' });
-Address.hasMany(Supplier, { foreignKey: 'AddressID' });
+// Example where the alias is changed for unique naming
+Address.hasMany(Supplier, { foreignKey: 'AddressID', as: 'SupplierAddresses' });
+Supplier.belongsTo(Address, { foreignKey: 'AddressID', as: 'SupplierLocation' });
+
 
 // User Relationships
 User.hasMany(Receipt, { foreignKey: 'ReceiverUserID', as: 'ReceivedReceipts' });
@@ -142,11 +150,6 @@ Receipt.belongsTo(PurchaseOrder, { foreignKey: 'PurchaseOrderID' });
 Inventory.belongsTo(WarehouseLocation, { foreignKey: 'LocationID' });
 WarehouseLocation.hasMany(Inventory, { foreignKey: 'LocationID' });
 
-StockMovement.belongsTo(WarehouseLocation, { foreignKey: 'FromLocationID', as: 'FromLocation' });
-WarehouseLocation.hasMany(StockMovement, { foreignKey: 'FromLocationID', as: 'DepartingMovements' });
-
-StockMovement.belongsTo(WarehouseLocation, { foreignKey: 'ToLocationID', as: 'ToLocation' });
-WarehouseLocation.hasMany(StockMovement, { foreignKey: 'ToLocationID', as: 'ArrivingMovements' });
 
 // Inventory Relationships
 Inventory.belongsTo(ProductLot, { foreignKey: 'ProductLotID' });
@@ -198,22 +201,12 @@ ReturnAuthorizationLineItem.belongsTo(Product, { foreignKey: 'ProductID' });
 Product.hasMany(ReturnAuthorizationLineItem, { foreignKey: 'ProductID' });
 
 // Address Relationships
-Supplier.belongsTo(Address, { foreignKey: 'AddressID' });
-Address.hasMany(Supplier, { foreignKey: 'AddressID', as: 'Suppliers' });
-
 PurchaseOrder.belongsTo(Address, { foreignKey: 'ShippingAddressID', as: 'ShippingAddress' });
 Address.hasMany(PurchaseOrder, { foreignKey: 'ShippingAddressID', as: 'ShippingPOs' });
 
 PurchaseOrder.belongsTo(Address, { foreignKey: 'BillingAddressID', as: 'BillingAddress' });
 Address.hasMany(PurchaseOrder, { foreignKey: 'BillingAddressID', as: 'BillingPOs' });
 
-OutboundOrder.belongsTo(Address, { foreignKey: 'ShippingAddressID', as: 'ShippingAddress' });
-Address.hasMany(OutboundOrder, { foreignKey: 'ShippingAddressID', as: 'ShippingOrders' });
-
-OutboundOrder.belongsTo(Address, { foreignKey: 'BillingAddressID', as: 'BillingAddress' });
-Address.hasMany(OutboundOrder, { foreignKey: 'BillingAddressID', as: 'BillingOrders' });
-
-// Export the models
 // Export the models
 module.exports = {
     Receipt,

@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const { sequelize, DataTypes } = require('../config/db');
+
 
 // New Entity: OutboundOrder
 const OutboundOrder = sequelize.define('OutboundOrder', {
@@ -17,13 +17,15 @@ const OutboundOrder = sequelize.define('OutboundOrder', {
         type: DataTypes.DATE,
         allowNull: false,
     },
-    CustomerID: { // Foreign key (assuming Customer model exists)
-        type: DataTypes.INTEGER,
-        references: {
-            model: 'Customers', // Assuming Customer model name
-            key: 'CustomerID'
-        }
-    },
+    // CustomerID: { // Foreign key (assuming Customer model exists)
+    //     type: DataTypes.INTEGER,
+    //     references: {
+    //         model: 'Customers', // Assuming Customer model name
+    //         key: 'CustomerID'
+    //     }
+    //     ,
+    //     allowNull: true,
+    // },
     OrderStatus: {
         type: DataTypes.STRING(50),
         defaultValue: 'Pending',
@@ -66,7 +68,7 @@ const OutboundOrder = sequelize.define('OutboundOrder', {
 },
 {
     timestamps: true,
-    tableName: 'outbound_orders',
+    tableName: 'OutboundOrders',
     indexes: [
         {
             unique: true,

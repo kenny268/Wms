@@ -1,5 +1,4 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/db';
+const { sequelize, DataTypes } = require('../config/db');
 
 // New Entity: Inventory
 const Inventory = sequelize.define('Inventory', {
@@ -49,7 +48,7 @@ const Inventory = sequelize.define('Inventory', {
 },
 {
     timestamps: true,
-    tableName: 'inventories',
+    tableName: 'Inventories',
     indexes: [
         {
             unique: true,

@@ -1,5 +1,4 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const { sequelize, DataTypes } = require('../config/db');
 
 // Define the Receipt model
 const Receipt = sequelize.define('Receipt', {
@@ -52,6 +51,10 @@ const Receipt = sequelize.define('Receipt', {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
     },
+    status: {
+        type: DataTypes.STRING(50),
+        defaultValue: 'Pending',
+    },
     Notes: {
         type: DataTypes.TEXT,
     },
@@ -95,7 +98,7 @@ const Receipt = sequelize.define('Receipt', {
 },
 {
     timestamps: true,
-    tableName: 'receipt',
+    tableName: 'Receipts',
 });
 
 module.exports = Receipt;

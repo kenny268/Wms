@@ -1,5 +1,4 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const { sequelize, DataTypes } = require('../config/db');
 
 // New Entity: ReturnAuthorization (RMA)
 const ReturnAuthorization = sequelize.define('ReturnAuthorization', {
@@ -63,6 +62,7 @@ const ReturnAuthorization = sequelize.define('ReturnAuthorization', {
 {
     timestamps: false,
     freezeTableName: true,
+    tableName: 'ReturnAuthorizations',
 });
 
 module.exports = ReturnAuthorization;
