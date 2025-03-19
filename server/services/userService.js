@@ -1,7 +1,8 @@
+require('dotenv').config(); // Load environment variables from .env file
 const { User, Role, UserRole } = require('../models');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const config = require('../config/config');
+// const config = require('../config/config'); // Remove this line
 const logger = require('../utils/logger');
 
 const userService = {
@@ -89,7 +90,7 @@ const userService = {
                 include: [{
                     model: User,
                     where: { UserID: user.UserID },
-                    through: { attributes: []}, // Exclude UserRole attributes
+                    through: { attributes:[] } // Exclude UserRole attributes
                 }],
                 attributes: ['RoleName'],
             });
@@ -98,16 +99,16 @@ const userService = {
             // Generate JWT
             const token = jwt.sign(
                 { UserId: user.UserID, Username: user.Username, Roles: roleNames },
-                config.jwtSecret,
-                { expiresIn: config.jwtExpiresIn || '1h' }
+                process.env.JWT_SECRET, // Use environment variable
+                { expiresIn: process.env.JWT_EXPIRES_IN || '1h' } // Use environment variable with default
             );
 
             // Set HTTP cookie
             res.cookie('authToken', token, {
                 httpOnly: true,
-                secure: config.nodeEnv === 'production', // Set to true in production over HTTPS
+                secure: process.env.NODE_ENV === 'production', // Set to true in production over HTTPS
                 sameSite: 'Strict',
-                maxAge: config.jwtCookieMaxAge || 3600000, // Default 1 hour in milliseconds
+                maxAge: parseInt(process.env.JWT_COOKIE_MAX_AGE) || 3600000, // Use environment variable with default and parse to int
             });
 
             logger.info(`User ${user.UserID} logged in.`);
@@ -157,7 +158,7 @@ const userService = {
             const user = await User.findByPk(id, {
                 include: [{
                     model: Role,
-                    through: { attributes: []},
+                    through: { attributes:[]},
                     attributes: ['RoleID', 'RoleName'],
                 }],
                 attributes: { exclude: ['password'] },
@@ -216,7 +217,7 @@ const userService = {
             const updatedUser = await User.findByPk(id, {
                 include: [{
                     model: Role,
-                    through: { attributes: []},
+                    through: { attributes:[]},
                     attributes: ['RoleID', 'RoleName'],
                 }],
                 attributes: { exclude: ['password'] },
