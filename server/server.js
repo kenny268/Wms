@@ -7,6 +7,9 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
+
+//custom imports
 const { sequelize } = require('./config/db');
 const allRoutes = require('./routes/index');
 
@@ -16,7 +19,7 @@ const logger = require('./utils/logger');
 
 const app = express();
 const port = process.env.SERVER_PORT || 4000; // Read port from .env, default to 3000
-
+app.use(morgan('combined', { stream: { write: (message) => logger.info(message) } }));
 // Middleware
 
 // Rate limiter for all requests
