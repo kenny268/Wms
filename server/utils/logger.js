@@ -1,11 +1,11 @@
 const winston = require('winston');
 const path = require('path');
+const morgan = require('morgan');
 const { format } = require('winston');
 const { combine, timestamp, printf, errors } = format;
 
 // Custom format for logs
 const logFormat = printf(({ level, message, timestamp, stack }) => {
-    // If the log has a stack (for errors), we include it
     return stack
         ? `${timestamp} ${level}: ${message}\n${stack}`
         : `${timestamp} ${level}: ${message}`;
@@ -62,23 +62,22 @@ if (process.env.NODE_ENV === 'development') {
     }));
 }
 
+// Use Morgan to log HTTP requests and responses, integrating it with Winston
+const stream = {
+    write: (message) => logger.httpRequest(message) // Morgan writes logs via Winston
+};
+
+// Morgan setup
+const morganMiddleware = morgan('combined', { stream }); // Use 'combined' or 'dev' format as per your requirement
+
 // A utility function to log HTTP requests with metadata (e.g., URL, method)
-logger.httpRequest = function (req, res, next) {
-    const start = Date.now();
-
-    // Log the incoming request
-    this.info(`Incoming request: ${req.method} ${req.url}`);
-
-    // Log response after it's handled
-    res.on('finish', () => {
-        const duration = Date.now() - start;
-        this.info(`Request completed: ${req.method} ${req.url} - ${res.statusCode} [${duration}ms]`);
-    });
-
-    next(); // Continue processing the request
+logger.httpRequest = function (message) {
+    // Log incoming HTTP request details
+    this.info(message);
 };
 
 // Add the logger to global scope to enable easy access (optional)
 global.logger = logger;
 
+// Export only the logger, not the morgan middleware
 module.exports = logger;
