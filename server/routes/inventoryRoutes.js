@@ -5,6 +5,7 @@ const { authenticateToken, authorizeRole } = require('../middleware/auth');
 const { param, query, body } = require('express-validator');
 const { getAllInventory, getInventoryById, getInventoryByProductId, getInventoryByLocationId, getInventoryByLotNumber, updateInventoryQuantity } = require('../controllers/inventoryController');
 
+
 // Routes
 router.get('/api/inventory', authenticateToken, authorizeRole(['viewer', 'warehouse', 'admin']), [
     query('productId').optional().isInt().withMessage('Product ID must be an integer'),
