@@ -16,6 +16,7 @@ const stockTakeRoutes = require('./stockTakeRoutes');
 const supplierRoutes = require('./supplierRoutes');
 const userRoleRoutes = require('./userRoleRoutes');
 const userRoutes = require('./userRoutes');
+const unitOfMeasureRoutes = require('./unitOfMeasureRoutes');
 const warehouseLocationRoutes = require('./warehouseLocationRoutes');
 
 // Function to extract route information
@@ -123,6 +124,7 @@ router.use(stockTakeRoutes);
 router.use(supplierRoutes);
 router.use(userRoleRoutes);
 router.use(userRoutes);
+router.use(unitOfMeasureRoutes);
 router.use(warehouseLocationRoutes);
 
 module.exports = router;
