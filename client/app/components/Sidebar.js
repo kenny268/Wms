@@ -23,7 +23,6 @@ export const menuItems = [ // Add 'export' here
         subItems: [
           { name: "ReceivingList", key: "receiving-list" },
           { name: "CreateReceipt", key: "create-receipt" },
-          { name: "EditReceipt", key: "edit-receipt" },
           { name: "AddLineItems", key: "add-line-items" },
           { name: "ReceiptDetails", key: "receipt-details" },
         ],
@@ -34,7 +33,6 @@ export const menuItems = [ // Add 'export' here
         subItems: [
           { name: "POList", key: "po-list" },
           { name: "CreatePO", key: "create-po" },
-          { name: "EditPO", key: "edit-po" },
           { name: "PODetails", key: "po-details" },
           { name: "AddPOLineItem", key: "add-po-line-item" },
         ],
@@ -45,7 +43,6 @@ export const menuItems = [ // Add 'export' here
         subItems: [
           { name: "RAList", key: "ra-list" },
           { name: "CreateRA", key: "create-ra" },
-          { name: "EditRA", key: "edit-ra" },
           { name: "RADetails", key: "ra-details" },
           { name: "AddRALineItem", key: "add-ra-line-item" },
         ],
@@ -58,49 +55,34 @@ export const menuItems = [ // Add 'export' here
     key: "inventory",
     subItems: [
       {
-        name: "ProductList",
-        key: "product-list",
+        name: "Products",
+        key: "products",
         subItems: [
-          { name: "Table", key: "table" },
-          { name: "SearchInput", key: "search-input" },
-          { name: "Pagination", key: "pagination" },
+          { name: "CreateProduct", key: "create-product" },
+          { name: "EditProduct", key: "edit-product" },
+          {name:"ProductList", key:"product-list"}
         ],
       },
-      { name: "CreateProduct", key: "create-product" },
-      { name: "EditProduct", key: "edit-product" },
+
       {
-        name: "StockMovementList",
-        key: "stock-movement-list",
+        name: "Stock",
+        key: "stock",
         subItems: [
-          { name: "Table", key: "table" },
-          { name: "SearchInput", key: "search-input" },
-          { name: "Pagination", key: "pagination" },
+          { name: "StockMovementList", key: "stock-movement-list" },
+          { name: "CreateStockMovement", key: "create-stock-movement" },
+          { name: "StockTakeList", key: "stock-take-list" },
+          { name: "CreateStockTake", key: "create-stock-take" },
         ],
       },
-      { name: "CreateStockMovement", key: "create-stock-movement" },
-      { name: "EditStockMovement", key: "edit-stock-movement" },
       {
-        name: "StockTakeList",
-        key: "stock-take-list",
+        name: "Warehouse",
+        key: "warehouse",
         subItems: [
-          { name: "Table", key: "table" },
-          { name: "SearchInput", key: "search-input" },
-          { name: "Pagination", key: "pagination" },
+          { name: "WarehouseLocationList", key: "warehouse-location-list" },
+          { name: "CreateWarehouseLocation", key: "create-warehouse-location" },
         ],
       },
-      { name: "CreateStockTake", key: "create-stock-take" },
-      { name: "EditStockTake", key: "edit-stock-take" },
-      {
-        name: "WarehouseLocationList",
-        key: "warehouse-location-list",
-        subItems: [
-          { name: "Table", key: "table" },
-          { name: "SearchInput", key: "search-input" },
-          { name: "Pagination", key: "pagination" },
-        ],
-      },
-      { name: "CreateWarehouseLocation", key: "create-warehouse-location" },
-      { name: "EditWarehouseLocation", key: "edit-warehouse-location" },
+
     ],
   },
   {
@@ -114,7 +96,6 @@ export const menuItems = [ // Add 'export' here
         subItems: [
           { name: "OutboundOrderList", key: "outbound-order-list" },
           { name: "CreateOutboundOrder", key: "create-outbound-order" },
-          { name: "EditOutboundOrder", key: "edit-outbound-order" },
           { name: "OutboundOrderDetails", key: "outbound-order-details" },
           { name: "AddOutboundOrderLineItem", key: "add-outbound-order-line-item" },
         ],
@@ -125,7 +106,6 @@ export const menuItems = [ // Add 'export' here
         subItems: [
           { name: "ShipmentList", key: "shipment-list" },
           { name: "CreateShipment", key: "create-shipment" },
-          { name: "EditShipment", key: "edit-shipment" },
           { name: "ShipmentDetails", key: "shipment-details" },
           { name: "AddShipmentLineItem", key: "add-shipment-line-item" },
         ],
@@ -143,7 +123,6 @@ export const menuItems = [ // Add 'export' here
         subItems: [
           { name: "UserRoleList", key: "user-role-list" },
           { name: "CreateUserRole", key: "create-user-role" },
-          { name: "EditUserRole", key: "edit-user-role" },
         ],
       },
       {
@@ -161,7 +140,6 @@ export const menuItems = [ // Add 'export' here
         subItems: [
           { name: "RoleList", key: "role-list" },
           { name: "CreateRole", key: "create-role" },
-          { name: "EditRole", key: "edit-role" },
         ],
       },
       {
@@ -170,13 +148,17 @@ export const menuItems = [ // Add 'export' here
         subItems: [
           { name: "UnitOfMeasureList", key: "unit-of-measure-list" },
           { name: "CreateUnitOfMeasure", key: "create-unit-of-measure" },
-          { name: "EditUnitOfMeasure", key: "edit-unit-of-measure" },
         ],
       },
     ],
   },
-  { name: "FAQs", icon: <FaInfoCircle />, key: "faqs" },
-  { name: "Logout", icon: <FaSignOutAlt />, key: "logout" },
+  { 
+    name: "FAQs", 
+    icon: <FaInfoCircle />, 
+    key: "faqs" 
+  },
+  { 
+    name: "Logout", icon: <FaSignOutAlt />, key: "logout" },
 ];
 
 const Sidebar = ({ setActivePage }) => {
