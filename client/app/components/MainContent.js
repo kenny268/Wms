@@ -1,18 +1,53 @@
-'use client';
-// src/components/MainContent.js
-import { useState } from "react";
-import { menuItems } from "./Sidebar"; // Import menuItems
+import { useState, useEffect } from "react";
+import { menuItems } from "./Sidebar"; // Import menus
+import AddPOLineItem from "./Inbound/PurchaseOrders/AddPOLineItem";
+import CreatePO from "./Inbound/PurchaseOrders/CreatePO";
+import POList from "./Inbound/PurchaseOrders/POList";
+import PODetails from "./Inbound/PurchaseOrders/PODetails";
+import AddLineItems from "./Inbound/ReceivingGoods/AddLineItems";
+import CreateReceipt from "./Inbound/ReceivingGoods/CreateReceipt";
+import ReceiptDetails from "./Inbound/ReceivingGoods/ReceiptDetails";
+import ReceivingList from "./Inbound/ReceivingGoods/ReceivingList";
+import RAList from "./Inbound/ReturnAuthorizations/RAList";
+import CreateRA from "./Inbound/ReturnAuthorizations/CreateRA";
+import RADetails from "./Inbound/ReturnAuthorizations/RADetails";
+import CreateProduct from "./Inventory/Products/CreateProduct";
+import ProductList from "./Inventory/Products/ProductList";
+import CreateStockMovement from "./Inventory/Stock/CreateStockMovement";
+import StockMovementList from "./Inventory/Stock/StockMovementList";
+import CreateStockTake from "./Inventory/Stock/CreateStockTake";
+import StockTakeList from "./Inventory/Stock/StockTakeList";
+import CreateWarehouseLocation from "./Inventory/Warehouse/CreateWarehouseLocation";
+import WarehouseLocationList from "./Inventory/Warehouse/WarehouseLocationList";
+import AddOutboundOrderLineItem from "./Outbound/OutboundOrders/AddOutboundOrderLineItem";
+import CreateOutboundOrder from "./Outbound/OutboundOrders/CreateOutboundOrder";
+import OutboundOrderDetails from "./Outbound/OutboundOrders/OutboundOrderDetails";
+import OutboundOrderList from "./Outbound/OutboundOrders/OutboundOrderList";
+import AddShipmentLineItem from "./Outbound/Shipments/AddShipmentLineItem";
+import CreateShipment from "./Outbound/Shipments/CreateShipment";
+import ShipmentDetails from "./Outbound/Shipments/ShipmentDetails";
+import ShipmentList from "./Outbound/Shipments/ShipmentList";
+import CreateRole from "./Settings/Roles/CreateRole";
+import RoleList from "./Settings/Roles/RoleList";
+import UserList from "./Settings/Users/UserList";
+import CreateUser from "./Settings/Users/CreateUser";
+import CreateUnitOfMeasure from "./Settings/UnitsofMeasure/CreateUnitOfMeasure";
+import UnitOfMeasureList from "./Settings/UnitsofMeasure/UnitOfMeasureList";
+import CreateUserRole from "./Settings/UserRoles/CreateUserRole";
+import UserRoleList from "./Settings/UserRoles/UserRoleList";
+
+
+const menus = menuItems;
 
 const pages = {
   inbound: <div>Inbound Section</div>,
-  "receiving-goods": <div>Receiving Goods</div>,
-  "purchase-orders": <div>Purchase Orders</div>,
-  "return-authorization": <div>Return Authorizations</div>,
+  "receiving-goods": <ReceivingList />,
+  "purchase-orders": <POList />,
+  "return-authorization": <RAList />,
   inventory: <div>Inventory Management</div>,
   "products": <div>Products</div>,
-  "stock-movement": <div>Stock Movement</div>,
-  "stock-take": <div>Stock Take</div>,
-  "warehouse-location": <div>Warehouse Location</div>,
+  "stock": <div>Stock Movement</div>,
+  "warehouse": <div>Warehouse Location</div>,
   outbound: <div>Outbound Section</div>,
   "outbound-orders": <div>Outbound Orders</div>,
   shipments: <div>Shipments</div>,
@@ -23,59 +58,44 @@ const pages = {
   "unit-of-measure": <div>Units of Measure</div>,
   faqs: <div>FAQs</div>,
   logout: <div>Logging Out...</div>,
-
-  // New pages from the updated menuItems
-  "receiving-list": <div>Receiving List Content</div>,
-  "create-receipt": <div>Create Receipt Content</div>,
-  "edit-receipt": <div>Edit Receipt Content</div>,
-  "add-line-items": <div>Add Line Items Content</div>,
-  "receipt-details": <div>Receipt Details Content</div>,
-  "po-list": <div>PO List Content</div>,
-  "create-po": <div>Create PO Content</div>,
-  "edit-po": <div>Edit PO Content</div>,
-  "po-details": <div>PO Details Content</div>,
-  "add-po-line-item": <div>Add PO Line Item Content</div>,
-  "ra-list": <div>RA List Content</div>,
-  "create-ra": <div>Create RA Content</div>,
-  "edit-ra": <div>Edit RA Content</div>,
-  "ra-details": <div>RA Details Content</div>,
-  "add-ra-line-item": <div>Add RA Line Item Content</div>,
-  table: <div>Table Content</div>,
-  "search-input": <div>Search Input Content</div>,
-  pagination: <div>Pagination Content</div>,
-  "create-product": <div>Create Product Content</div>,
-  "edit-product": <div>Edit Product Content</div>,
-  "stock-movement-list": <div>Stock Movement List Content</div>,
-  "create-stock-movement": <div>Create Stock Movement Content</div>,
-  "edit-stock-movement": <div>Edit Stock Movement Content</div>,
-  "stock-take-list": <div>Stock Take List Content</div>,
-  "create-stock-take": <div>Create Stock Take Content</div>,
-  "edit-stock-take": <div>Edit Stock Take Content</div>,
-  "warehouse-location-list": <div>Warehouse Location List Content</div>,
-  "create-warehouse-location": <div>Create Warehouse Location Content</div>,
-  "edit-warehouse-location": <div>Edit Warehouse Location Content</div>,
-  "outbound-order-list": <div>Outbound Order List Content</div>,
-  "create-outbound-order": <div>Create Outbound Order Content</div>,
-  "edit-outbound-order": <div>Edit Outbound Order Content</div>,
-  "outbound-order-details": <div>Outbound Order Details Content</div>,
-  "add-outbound-order-line-item": <div>Add Outbound Order Line Item Content</div>,
-  "shipment-list": <div>Shipment List Content</div>,
-  "create-shipment": <div>Create Shipment Content</div>,
-  "edit-shipment": <div>Edit Shipment Content</div>,
-  "shipment-details": <div>Shipment Details Content</div>,
-  "add-shipment-line-item": <div>Add Shipment Line Item Content</div>,
-  "user-role-list": <div>User Role List Content</div>,
-  "create-user-role": <div>Create User Role Content</div>,
-  "edit-user-role": <div>Edit User Role Content</div>,
-  "user-list": <div>User List Content</div>,
-  "create-user": <div>Create User Content</div>,
-  "edit-user": <div>Edit User Content</div>,
-  "role-list": <div>Role List Content</div>,
-  "create-role": <div>Create Role Content</div>,
-  "edit-role": <div>Edit Role Content</div>,
-  "unit-of-measure-list": <div>Unit Of Measure List Content</div>,
-  "create-unit-of-measure": <div>Create Unit Of Measure Content</div>,
-  "edit-unit-of-measure": <div>Edit Unit Of Measure Content</div>,
+  
+  // New pages from the updated menus
+  "receiving-list": <ReceivingList />,
+  "create-receipt": <CreateReceipt />,
+  "add-line-items": <AddLineItems />,
+  "receipt-details": <ReceiptDetails />,
+  "po-list": <POList />,
+  "create-po": <CreatePO />,
+  "po-details": <PODetails />,
+  "add-po-line-item": <AddPOLineItem />,
+  "ra-list": <RAList />,
+  "create-ra": <CreateRA />,
+  "ra-details": <RADetails />,
+  "add-ra-line-item": <RADetails />,
+  "create-product": <CreateProduct />,
+  'product-list': <ProductList />,
+  "stock-movement-list": <StockMovementList />,
+  "create-stock-movement": <CreateStockMovement />,
+  "stock-take-list": <StockTakeList />,
+  "create-stock-take": <CreateStockTake />,
+  "warehouse-location-list": <WarehouseLocationList />,
+  "create-warehouse-location": <CreateWarehouseLocation />,
+  "outbound-order-list": <OutboundOrderList />,
+  "create-outbound-order": <CreateOutboundOrder />,
+  "outbound-order-details": <OutboundOrderDetails />,
+  "add-outbound-order-line-item": <AddOutboundOrderLineItem />,
+  "shipment-list": <ShipmentList />,
+  "create-shipment": <CreateShipment />,
+  "shipment-details": <ShipmentDetails />,
+  "add-shipment-line-item": <AddShipmentLineItem />,
+  "role-list": <RoleList />,
+  "create-role": <CreateRole />,
+  "unit-of-measure-list": <UnitOfMeasureList />,
+  "create-unit-of-measure": <CreateUnitOfMeasure />,
+  "user-list": <UserList />,
+  "create-user": <CreateUser />,
+  "create-user-role": <CreateUserRole />,
+  "user-role-list": <UserRoleList />,
 };
 
 const MainContent = ({ activePage }) => {
@@ -98,39 +118,51 @@ const MainContent = ({ activePage }) => {
   };
 
   const renderContent = () => {
-    const directPage = pages[activePage];
-    if (directPage) {
-      console.log(`[MainContent] Direct page found for: ${activePage}`);
-      return directPage;
-    }
-  
-    console.log(`[MainContent] Active Page: ${activePage}`);
-  
-    for (const menuItem of menuItems) {
+    // Iterate over menus to find the active one
+    for (const menuItem of menus) {
       if (menuItem.subItems) {
         for (const subItem of menuItem.subItems) {
-          console.log(`[MainContent] Checking subItem: ${subItem.key}`);
+          // If the subItem's key matches the activePage, render its content
           if (subItem.key === activePage) {
-            console.log(`[MainContent] Found matching subItem: ${subItem.key}`);
             if (subItem.subItems) {
-              console.log(`[MainContent] Rendering tabs for: ${subItem.key}`, subItem.subItems);
+              // Set default tab if there is no activeTab
+              if (!activeTab && subItem.subItems.length > 0) {
+                setActiveTab(subItem.subItems[0].key);
+              }
+
               return (
                 <>
                   {renderTabs(subItem.subItems)}
-                  <div>{pages[activeTab] || <div>Select a tab</div>}</div>
+                  <div>
+                    {pages[activeTab] || (subItem.subItems.length > 0 && !pages[activeTab]
+                      ? subItem.subItems[0].name // Show the name of the first subItem dynamically
+                      : <div>Select a tab</div>)}
+                  </div>
                 </>
               );
             } else {
-              console.log(`[MainContent] No subItems for matching subItem: ${subItem.key}`);
+              // Handle case where there are no subItems
+              return pages[activePage] || <div>No subItems available</div>;
             }
           }
         }
+      } else {
+        // If no subItems exist, handle items like 'FAQs', 'Logout', etc.
+        if (menuItem.key === activePage) {
+          return pages[activePage] || <div>Content not found</div>;
+        }
       }
     }
-  
-    console.log("[MainContent] No specific content found.");
+
+    // Fallback when no menu item matches the activePage
     return <div>Select a menu item</div>;
   };
+
+  useEffect(() => {
+    // This ensures that whenever activePage changes, we update the activeTab to the first tab of the subItems.
+    setActiveTab(null); // Reset the activeTab to make sure it updates based on the selected menu
+  }, [activePage]);
+
   return (
     <div className="w-3/4 flex flex-col">
       <div className="bg-gray-200 p-4 shadow-md flex justify-between">
