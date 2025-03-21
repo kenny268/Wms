@@ -20,39 +20,31 @@ const logger = require('./utils/logger');
 const app = express();
 const port = process.env.SERVER_PORT || 4000; // Read port from .env, default to 3000
 app.use(morgan('combined', { stream: { write: (message) => logger.info(message) } }));
-// Middleware
 
+// Middleware for logging all requests
 // Rate limiter for all requests
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: process.env.MAX_REQUESTS || 100, // Read max requests from .env
-    message: 'Too many requests from this IP, please try again after 15 minutes',
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-app.use(limiter);
+// const limiter = rateLimit({
+//     windowMs: 15 * 60 * 1000, // 15 minutes
+//     max: process.env.MAX_REQUESTS || 100, // Read max requests from .env
+//     message: 'Too many requests from this IP, please try again after 15 minutes',
+//     standardHeaders: true,
+//     legacyHeaders: false,
+// });
+// app.use(limiter);
 
-
-app.use('/api', allRoutes);
 
 // CORS configuration
 const corsOptions = {
-    origin: process.env.ALLOWED_ORIGINS || 'http://localhost:3000', // Read allowed origins from .env
+    // origin: process.env.ALLOWED_ORIGINS || 'http://localhost:3000', // Read allowed origins from .env
+    origin: '*', // Allow all origins temporarily
     credentials: true,
 };
+
 app.use(cors(corsOptions));
 
 // Security headers with Helmet
 app.use(helmet());
 
-// Rate limiter (example for specific endpoints like login)
-const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: process.env.LOGIN_MAX_ATTEMPTS || 100, // Read max login attempts from .env
-    message: 'Too many login attempts from this IP, please try again after 15 minutes',
-    standardHeaders: true,
-    legacyHeaders: false,
-});
 
 // Cookie parser middleware
 app.use(cookieParser());
@@ -62,7 +54,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-
+app.use('/api', allRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -73,10 +65,10 @@ app.use((err, req, res, next) => {
 // Database synchronization and server start
 async function startServer() {
     try {
-        // await sequelize.sync({ force: false });
+        await sequelize.sync({ force: false });
         logger.info('Database synchronized successfully.');
 
-        app.listen(port, () => {
+        app.listen(port,'0.0.0.0', () => {
             logger.info(`Server is running on port ${port}`);
         });
     } catch (error) {
